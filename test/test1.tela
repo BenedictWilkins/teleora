@@ -1,0 +1,2 @@
+
+goal(A,B,C) : test -> action

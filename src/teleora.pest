@@ -1,0 +1,32 @@
+
+document = { SOI ~ goal_short* ~ EOI}
+
+
+goal_short = { head ~ ":" ~ body? ~ "->" ~ (head | ATOM) }
+
+body = { ATOM* }
+
+op_compare = { (("<" | ">" ~ "="?) | "=" }
+
+
+
+head = { ATOM ~ "(" ~ head_args ~ ")" }
+head_args = { arg? ~ ("," ~ arg)* }
+
+arg = { VARIABLE | ATOM | NUMBER | list | ulist | obj }
+obj_arg = { (ATOM | VARIABLE) ~ ":" ~ arg }
+
+list  = { "[" ~ arg? ~ ("," ~ arg)* ~ "]" }
+ulist = { "{" ~ arg? ~ ("," ~ arg)* ~ "}" }
+obj   = { "{" ~ obj_arg? ~ ("," ~ obj_arg)* ~ "}" }
+
+ATOM = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+VARIABLE = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
+NUMBER = @{ FLOAT | INT }
+INT = @{ ASCII_NONZERO_DIGIT + }
+FLOAT = @{ FLOAT_DOT | FLOAT_EXP }
+FLOAT_DOT  = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+FLOAT_EXP  = @{ ASCII_DIGIT ~ "e" ~ ("+" | "-")? ~ ASCII_DIGIT+ } 
+
+WHITESPACE = _{ " " | NEWLINE }
+comments = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
