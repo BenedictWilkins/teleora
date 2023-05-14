@@ -1,2 +1,5 @@
-
-goal(A,B,C) : test -> action
+g1(X) : 
+X -> a
+g2(X) : { 
+    X -> a1
+}

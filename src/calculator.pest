@@ -1,0 +1,11 @@
+
+expr = { integer ~ (bin_op ~ integer)* }
+integer = @{ ASCII_DIGIT+ }
+bin_op = _{ add | subtract | multiply | divide }
+add = { "+" }
+subtract = { "-" }
+multiply = { "*" }
+divide = { "/" }
+modulo = { "%" }
+
+unary_minus = { "-" }

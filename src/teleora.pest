@@ -1,32 +1,56 @@
 
-document = { SOI ~ goal_short* ~ EOI}
+document = { SOI ~ (goal_short | goal_long)* ~ EOI}
 
 
-goal_short = { head ~ ":" ~ body? ~ "->" ~ (head | ATOM) }
-
-body = { ATOM* }
-
-op_compare = { (("<" | ">" ~ "="?) | "=" }
+goal_short = _{ head ~ ":" ~ body}
+goal_long = _{ head ~ ":" ~ "{" ~ body ~ ("," ~ body)* ~ "}" }
+body = { variable ~ "->" ~ (head | atom) }
 
 
 
-head = { ATOM ~ "(" ~ head_args ~ ")" }
+head = { atom ~ "(" ~ head_args ~ ")" }
 head_args = { arg? ~ ("," ~ arg)* }
 
-arg = { VARIABLE | ATOM | NUMBER | list | ulist | obj }
-obj_arg = { (ATOM | VARIABLE) ~ ":" ~ arg }
+arg = { variable | atom | number | list | ulist | obj }
+obj_arg = { (atom | variable) ~ ":" ~ arg }
 
 list  = { "[" ~ arg? ~ ("," ~ arg)* ~ "]" }
 ulist = { "{" ~ arg? ~ ("," ~ arg)* ~ "}" }
 obj   = { "{" ~ obj_arg? ~ ("," ~ obj_arg)* ~ "}" }
 
-ATOM = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
-VARIABLE = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-NUMBER = @{ FLOAT | INT }
-INT = @{ ASCII_NONZERO_DIGIT + }
-FLOAT = @{ FLOAT_DOT | FLOAT_EXP }
-FLOAT_DOT  = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
-FLOAT_EXP  = @{ ASCII_DIGIT ~ "e" ~ ("+" | "-")? ~ ASCII_DIGIT+ } 
+
+
+prim = _{ number | variable | atom | minus? ~ "(" ~ expr ~ ")"  }
+expr = { prim ~ (bin_op ~ prim)* }
+
+
+bin_op = _{ add | subtract | multiply | divide | modulo | eq | gt | lt | gte | lte }
+gt = { ">" }
+lt = { "<" }
+eq = { "=" }
+gte = { gt ~ eq }
+lte = { lt ~ eq }
+
+minus = { "-" }
+add = { "+" }
+subtract = { "-" }
+multiply = { "*" }
+divide = { "/" }
+modulo = { "%" }
+
+atom = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+variable = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
+
+number = _{ signed_float | signed_integer }
+signed_integer = { minus? ~ integer }
+signed_float = { minus? ~ float } 
+integer = @{ ASCII_NONZERO_DIGIT+ }
+float = @{ float_dot | float_exp }
+float_dot  = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+float_exp  = @{ ASCII_DIGIT ~ "e" ~ ("+" | "-")? ~ ASCII_DIGIT+ } 
 
 WHITESPACE = _{ " " | NEWLINE }
+
 comments = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+
+
