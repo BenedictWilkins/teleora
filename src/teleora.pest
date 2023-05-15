@@ -1,22 +1,26 @@
 
-document = { SOI ~ (goal_short | goal_long)* ~ EOI}
+document = { SOI ~ goal* ~ EOI}
 
-
+goal = { (goal_short | goal_long) }
 goal_short = _{ head ~ ":" ~ body}
 goal_long = _{ head ~ ":" ~ "{" ~ body ~ ("," ~ body)* ~ "}" }
-body = { variable ~ "->" ~ (head | atom) }
+body = { conditions ~ "->" ~  actions }
+
+conditions = { arg? ~ ("," ~ arg)* } 
+actions = { (head | atom) }
+
+head = { atom ~ "(" ~ arg? ~ ("," ~ arg)* ~ ")" } // at some point we could include basic arithmetic in goal headers...? #/                                                                      
 
 
-
-head = { atom ~ "(" ~ head_args ~ ")" }
-head_args = { arg? ~ ("," ~ arg)* }
-
-arg = { variable | atom | number | list | ulist | obj }
+arg = _{ variable | atom | number | list }         // | list | ulist | obj } TODO
 obj_arg = { (atom | variable) ~ ":" ~ arg }
+body_arg = { arg }                            // TODO update
 
-list  = { "[" ~ arg? ~ ("," ~ arg)* ~ "]" }
+list  = { "[]" | "[" ~ arg ~ ("," ~ arg)* ~ pipe_arg? ~ "]"  }
 ulist = { "{" ~ arg? ~ ("," ~ arg)* ~ "}" }
 obj   = { "{" ~ obj_arg? ~ ("," ~ obj_arg)* ~ "}" }
+
+pipe_arg = { "|" ~ arg } 
 
 
 
@@ -30,6 +34,7 @@ lt = { "<" }
 eq = { "=" }
 gte = { gt ~ eq }
 lte = { lt ~ eq }
+pipe = { "|" }
 
 minus = { "-" }
 add = { "+" }
@@ -40,6 +45,7 @@ modulo = { "%" }
 
 atom = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
 variable = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
+anon = @{ "_" ~ ASCII_ALPHANUMERIC }
 
 number = _{ signed_float | signed_integer }
 signed_integer = { minus? ~ integer }

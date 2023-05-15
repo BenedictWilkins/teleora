@@ -1,30 +1,37 @@
+use std::rc::Rc;
+
+#[derive(Debug)]
+pub struct Goal {
+    pub head : Rc<Statement>,
+    pub body : Statement
+}
+
+
+
 #[derive(Debug)]
 pub enum Statement {
-    Goal {
-        head: Box<Statement>,
-        conditions : Box<Statement>,
-        action : Box<Statement>
-    },
-    Head { 
-        name : Box<String>,
-        //args : Vec<Primitive>
+    Head {
+        name : Box<Statement>,
+        args : Box<Statement> // List
     },
     Body { 
-        condition : Box<Statement>,
-        action : Box<Statement>,
+        conditions : Box<Statement>,    // List
+        actions : Box<Statement>,       // List
     },
-    Primitive(Primitive),
-    Empty,
-}
-
-#[derive(Debug)]
-pub enum Primitive {
-    Variable(Box<String>),
-    Atom(Box<String>),
+    List(Vec<Statement>),
+    UList(Vec<Statement>),
+    Obj(Vec<(Statement,Statement)>),
+    Variable(String),
+    Atom(String),
     Integer(i32),
     Float(f32),
+    Empty,
+    BinaryOperator {
+        lhs: Box<Statement>,
+        op: Operator,
+        rhs: Box<Statement>,
+    },
 }
-
 
 #[derive(Debug)]
 pub enum Expression {
@@ -45,4 +52,5 @@ pub enum Operator {
     Multiply,
     Divide,
     Modulo,
+    Pipe,
 }
