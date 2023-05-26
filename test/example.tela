@@ -1,0 +1,119 @@
+
+
+/* 
+    Example: 
+    Agent in a grid, can take actions [left, right, up, down, idle] to move around. 
+    The agents goal is to reach the "goal" tile in the grid.
+
+    Example grid: 
+
+    (0,0)
+        - - - - - 
+        - P - - - 
+        - - - - -  
+        - - - - G 
+                    (4,4)
+*/
+
+
+// Example 1: where the agent gets a perception P = [(X,Y), (GX, GY)] which represents its position (X,Y) and the position of the goal (GX, GY)
+
+goal(P) : P = [(X,_), (GX, _)], X < GX -> right
+goal(P) : P = [(X,_), (GX, _)], X > GX -> left
+
+// can also use pattern matching in the head as follows:
+goal([(_,Y), (_, GY)]) : Y > GY -> up
+goal([(_,Y), (_, GY)]) : Y < GY -> down
+goal(_) : true -> idle                            // goal reached.
+
+// another way to write the above
+
+goal([(X,Y), (Y, GY)]) : {
+    X > GX -> right,
+    X < GX -> left,
+    Y > GY -> up,
+    Y < GY -> down,
+    true   -> idle // goal acheived. I prefer to write "-> idle" (i.e. omit "true")
+}
+
+
+// Example 2: where a loop is required to process the perception, the perception is an object that contains locations as follows:
+// P = {(0,0) : empty, (1,0) : empty, (2,0) : empty, ...,
+        ...,           (1,1) : agent,                  ...,
+        ...,                ...,                     ...,
+        ...,                ...,                     (4,4) : goal}
+// The task is the same
+
+
+[|] # structure
+{|} # 
+
+
+goal(P) : 
+    P = { (GX,GY) : goal, (X,Y) : agent, *EMPTY_LOCATIONS } // iterate over the object to find a match
+    -> move([(GX,GY),(X,Y)])
+
+move([(X,_), (GX,_)]) : X < GX -> right
+... // the other goal statements as in Example 1
+
+
+goal(P) :
+    foreach (GX,GY):Z in P: 
+        X > 1,
+    X > 2,
+
+
+
+goal() : 
+    GLOBAL_STATE.agent.location 
+
+
+ X > 1, Y > 1 -> move_right
+
+
+
+
+
+P = { (1,1) : empty, (2,2) : agent }
+
+goal(P): 
+    P = { (X,Y) : Z | _ },
+    X > 1,
+    Y > 1 -> subgoal(Z)
+
+
+>> X = 1, Y = 1
+>> X = 2, Y = 2 
+
+
+P = {0,1,2}
+
+goal(P): P = { X, Y, *Z } -> action
+
+goal(P) : {
+    P[X] > 1 -> action
+}   
+
+
+P = {1,2,3} = {2,1,3} = {3,2,1} = {1,3,2}
+
+
+goal(P):
+    P = { X | Y },
+    X > 1
+
+
+goal({})
+
+goal({1,2,3}):
+    {1,2,3} = {1 | {2,3}}
+    1 > 1 # FAIL
+
+    {1,2,3} = {2 | {1,3}}
+    2 > 1 # success 
+
+    {1,2,3} = {3 | {1,2}}
+    3 > 1 # success 
+
+
+

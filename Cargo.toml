@@ -10,3 +10,4 @@ edition = "2021"
 pest = "2.6.0"
 pest_derive = "2.6.0"
 pest_ascii_tree = "0.1.0" # debug (rmove)
+lazy_static = "*"

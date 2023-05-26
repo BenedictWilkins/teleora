@@ -7,24 +7,23 @@ goal_long = _{ head ~ ":" ~ "{" ~ body ~ ("," ~ body)* ~ "}" }
 body = { conditions ~ "->" ~  actions }
 
 conditions = { arg? ~ ("," ~ arg)* } 
-actions = { (head | atom) }
+actions = { (head | atom | variable) }
 
 head = { atom ~ "(" ~ arg? ~ ("," ~ arg)* ~ ")" } // at some point we could include basic arithmetic in goal headers...? #/                                                                      
 
-
-arg = _{ variable | atom | number | list }         // | list | ulist | obj } TODO
+arg = _{ expr | atom | list }         // | list | ulist | obj } TODO
 obj_arg = { (atom | variable) ~ ":" ~ arg }
 body_arg = { arg }                            // TODO update
 
-list  = { "[]" | "[" ~ arg ~ ("," ~ arg)* ~ pipe_arg? ~ "]"  }
-ulist = { "{" ~ arg? ~ ("," ~ arg)* ~ "}" }
+list   = { "[]" | "[" ~ seq ~ ("|" ~ arg)?  ~ "]"  }
+ulist  = { "{}" | "{" ~ seq ~ ("|" ~ arg)?  ~ "}"  }
 obj   = { "{" ~ obj_arg? ~ ("," ~ obj_arg)* ~ "}" }
 
-pipe_arg = { "|" ~ arg } 
+seq = { arg ~ ("," ~ arg)* }
 
 
 
-prim = _{ number | variable | atom | minus? ~ "(" ~ expr ~ ")"  }
+prim = _{ number | variable | minus? ~ "(" ~ expr ~ ")"  }
 expr = { prim ~ (bin_op ~ prim)* }
 
 

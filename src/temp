@@ -1,0 +1,48 @@
+
+
+fn parse_statement(statement: Pair<Rule>,  pratt: &PrattParser<Rule>) -> Statement {
+    println!("{:?}", statement.as_rule());
+    match statement.as_rule() {
+        Rule::head => {
+            let mut pairs = statement.into_inner();
+            let name = parse_statement(pairs.next().unwrap(), pratt);
+            let args = Statement::Seq(pairs.map(|p| parse_statement(p, pratt)).collect());
+            Statement::Head { name : Box::new(name), args : Box::new(args) }
+        },
+        Rule::body => {
+            //println!("---{:?}", statement);
+            let mut pairs = statement.into_inner();
+            let conditions = Statement::Seq(pairs.next().unwrap().into_inner().map(|p| parse_statement(p, pratt)).collect()); 
+            let actions = Statement::Seq(pairs.next().unwrap().into_inner().map(|p| parse_statement(p, pratt)).collect()); 
+            Statement::Body { conditions: Box::new(conditions), actions: Box::new(actions) }
+        },
+        Rule::list => {
+            // TODO this is horrible... why did you make me do it rust?!
+            let pairs = statement.into_inner();
+            let mut lst : Vec<Statement> = pairs.map(|p| parse_statement(p, pratt)).collect();
+            if lst.len() == 0 {
+                let l = Statement::List(Collection::new(Statement::Empty, Statement::Empty));
+                let _z = match l {
+                    Statement::List(x) => x.is_empty(),
+                    _ => unreachable!(),
+                };
+
+
+                return l;
+            } else if lst.len() == 1 {
+                return Statement::List(Collection::new(lst.remove(0), Statement::Empty));
+            } else {
+                return Statement::List(Collection::new(lst.remove(0), lst.remove(1)));
+            }
+        },
+        Rule::seq => { Statement::Seq(statement.into_inner().map(|p| parse_statement(p, pratt)).collect()) }
+        Rule::variable => Statement::Variable(statement.as_str().to_string()),
+        Rule::atom => Statement::Atom(statement.as_str().to_string()),
+        Rule::signed_integer => Statement::Integer(statement.as_str().parse::<i32>().unwrap()),
+        Rule::signed_float => Statement::Float(statement.as_str().parse::<f32>().unwrap()),
+        
+        
+        Rule::EOI => Statement::Empty,
+        _ => unreachable!("{}", statement),
+    }  
+}
