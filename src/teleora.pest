@@ -23,7 +23,7 @@ seq = { arg ~ ("," ~ arg)* }
 
 
 
-prim = _{ number | variable | minus? ~ "(" ~ expr ~ ")"  }
+prim = _{ number | minus? ~ variable | minus? ~ "(" ~ expr ~ ")"  }
 expr = { prim ~ (bin_op ~ prim)* }
 
 
