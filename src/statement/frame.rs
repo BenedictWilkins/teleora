@@ -1,7 +1,6 @@
 use std::{collections::HashMap};
 use crate::statement::{Statement, Variable, UList, List, AsStatement};
 use crate::statement::collection::Collection;
-use crate::statement::perm::PermutationIterator;
 
 impl Frame {
 
@@ -27,12 +26,12 @@ impl Frame {
             
             println!("{:?} --- {:?}", l1items.items, l2items.items);
 
-            let permiter = PermutationIterator::new(l1items.items, &mut l2items.items);
+            //let permiter = PermutationIterator::new(l1items.items, &mut l2items.items);
             
 
-            for p in permiter {
-                println!("??{:?}", p);
-            }
+            //for p in permiter {
+            //   println!("??{:?}", p);
+            //}
 
 
             

@@ -3,7 +3,6 @@ pub mod operator_unary;
 pub mod statement;
 pub mod operators;
 pub mod frame;
-pub mod perm;
 
 mod collection;
 mod debug;
