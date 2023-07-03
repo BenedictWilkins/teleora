@@ -1,31 +1,46 @@
 
-use crate::statement::{BinaryOperator, UnaryOperator};
+use std::{rc::Rc, collections::HashMap};
 
-#[derive(Debug, Copy, Clone)]
+use crate::statement::{BinaryOperator, UnaryOperator, Frame, Sequence, List, UList, Object};
+
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Float(pub f32);
-#[derive(Debug, Copy, Clone)]
-pub struct Integer(pub i32);
-#[derive(Debug, Copy, Clone)]
-pub struct Boolean(pub bool);
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Atom(pub String);
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Variable(pub String);
-#[derive(Clone)]
-pub struct Sequence(pub Vec<Statement>);
-#[derive(Clone)]
-pub struct List(pub (Sequence, bool));
-#[derive(Clone)]
-pub struct UList(pub (Sequence, bool));
-#[derive(Clone, Debug)]
-pub struct Object(pub (Sequence, bool));
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Integer(pub i32);
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Boolean(pub bool);
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Atom(pub String);
+
+/*
+#[derive(Debug, Clone, PartialEq)]
+pub struct Compound {
+    pub name : String,
+    pub arguments : Sequence,
+} */
+
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Variable {
+    pub name : String
+}
+
+impl Variable {
+    pub fn is_anonymous(&self) -> bool {
+        return self.name == "_";
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     Float(Float),
     Integer(Integer),
     Boolean(Boolean),
     Atom(Atom),
+    //Compound(Compound),
     Variable(Variable),
     BinaryOperator(BinaryOperator),
     UnaryOperator(UnaryOperator),
@@ -40,31 +55,9 @@ impl Default for Atom {
     fn default() -> Self { Self(Default::default())}
 }
 
-impl Default for Sequence {
-    fn default() -> Self { Self(Vec::new())}
-}
-
-impl Default for List {
-    fn default() -> Self { Self((Sequence::default(),false))}
-}
-
 impl Default for Variable {
-    fn default() -> Self { Self(Default::default())}
-}
-
-impl Sequence {
-    pub fn len(&self) -> usize {
-        return self.0.len();
-    }
-    pub fn iter(&self) -> std::slice::Iter<'_, Statement> {
-        self.0.iter()
-    }
-
-    pub fn split_at(&self, index : usize) -> (&[Statement], &[Statement])  {
-        return self.0.split_at(index);
-    }
-}
-
+    fn default() -> Self { Self { ..Default::default() }}
+} 
 
 impl Statement {
     pub fn evaluate(&self) -> Statement {
@@ -80,6 +73,20 @@ impl Statement {
 }
 
 
+
+// pattern matching
+
+pub trait Ground {
+    fn ground(&self, other : &Statement) -> Option<&Self>;
+}
+
+
+
+
+
+
+
+// converting types to their corresponding Statement variants... could probably be done with a macro...
 pub trait AsStatement {
     fn as_statement(self) -> Statement ;
 }
@@ -144,16 +151,38 @@ impl AsStatement for i32 {
     }
 }
 
+// Type conversions
 impl From<UList> for List {
     fn from(item: UList) -> Self {
-        return List((item.0.0, item.0.1));
+        return List { items : item.items, ispiped : item.ispiped };
     }
 }
 
 impl From<List> for UList {
     fn from(item: List) -> Self {
-        return UList((item.0.0, item.0.1));
+        return UList { items : item.items, ispiped : item.ispiped };
     }
+}
+
+impl List {
+    pub fn new(items : Sequence, ispiped : bool) -> Self {
+        return List { items : items, ispiped : ispiped };
+    }
+
+    pub fn len(&self) -> usize {
+        return self.items.len();
+    }
+}
+
+impl UList {
+    pub fn new(items : Sequence, ispiped : bool) -> Self {
+        return UList { items : items, ispiped : ispiped };
+    }
+
+    pub fn len(&self) -> usize {
+        return self.items.len();
+    }
+
 }
 
 

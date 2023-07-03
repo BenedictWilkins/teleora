@@ -1,8 +1,8 @@
 
 use crate::statement::{Statement, Float, Integer};
-use crate::statement::negate::Negate;
+use crate::statement::operators::Negate;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UnaryOperator {
     Minus(Box<Statement>),
     Not(Box<Statement>), // TODO

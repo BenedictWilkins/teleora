@@ -1,10 +1,10 @@
 
 
 use crate::statement::{Statement, Float, Integer};
-use crate::statement::add::Add;
+use crate::statement::operators::Add;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
     Add(Box<Statement>, Box<Statement>),
     Subtract(Box<Statement>, Box<Statement>), // TODO

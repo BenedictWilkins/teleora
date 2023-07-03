@@ -1,18 +1,20 @@
 
 document = { SOI ~ goal* ~ EOI}
-
 goal = { (goal_short | goal_long) }
-goal_short = _{ head ~ ":" ~ body}
-goal_long = _{ head ~ ":" ~ "{" ~ body ~ ("," ~ body)* ~ ","? ~ "}" }
+goal_short = _{ compound ~ ":" ~ body}
+goal_long = _{ compound ~ ":" ~ "{" ~ body ~ ("," ~ body)* ~ ","? ~ "}" }
 body = { conditions ~ "->" ~  actions }
-head = { atom ~ "(" ~ arg? ~ ("," ~ arg)* ~ ")" } // at some point we could include basic arithmetic in goal headers...? #/                                                                      
-arg = _{ expr }
-
+compound = { atom ~ "(" ~ arg? ~ ("," ~ arg)* ~ ")" } // at some point we could include basic arithmetic in goal compounders...? #/                                                                      
 conditions = { lexpr? ~ ("," ~ lexpr)* } 
+actions = { compound | atom | variable }
 
-actions = { head | atom | variable }
+// used to parse observations (observations are sequences of grounded terms)
+observation = { SOI ~ arg ~ ("," ~ arg)* ~ SILENT_EOI}
 
 
+seq = { arg ~ ("," ~ arg)* }
+
+arg = _{ expr }
 obj_arg = { (atom | variable) ~ ":" ~ arg }
 pipe_arg = { variable | list | ulist }
 
@@ -21,7 +23,7 @@ ulist  = { "{}" | "{" ~ seq ~ ("|" ~ pipe_arg)?  ~ "}"  }
 obj   = { "{" ~ obj_arg? ~ ("," ~ obj_arg)* ~ "}" }
 collection = _{ list | ulist | obj }
 
-seq = { arg ~ ("," ~ arg)* }
+
 
 expr = { atom | collection | prim ~ (bin_op ~ prim)* }
 prim = _{ number | unary_op? ~ variable | unary_op? ~ "(" ~ expr ~ ")"  }
@@ -52,8 +54,7 @@ divide =    { "/" }
 modulo =    { "%" }
 
 atom = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
-variable = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-anon = @{ "_" ~ ASCII_ALPHANUMERIC }
+variable = @{ ("_" | ASCII_ALPHA_UPPER) ~ ASCII_ALPHANUMERIC* }
 
 number = _{ signed_float | signed_integer }
 signed_integer = { minus? ~ integer }
@@ -64,7 +65,5 @@ float_dot  = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
 float_exp  = @{ ASCII_DIGIT ~ "e" ~ ("+" | "-")? ~ ASCII_DIGIT+ } 
 
 WHITESPACE = _{ " " | NEWLINE }
-
-comments = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
-
-
+COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+SILENT_EOI = _{ !ANY }
